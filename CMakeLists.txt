@@ -34,8 +34,6 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        officeconnection.h
-        officeconnection.cpp
         slideshowcontroller.h
         slideshowcontroller.cpp
 )

@@ -1,3 +1,4 @@
+#include <cppuhelper/bootstrap.hxx>
 #include <com/sun/star/awt/Toolkit.hpp>
 #include <com/sun/star/frame/XFrame.hpp>
 #include <com/sun/star/frame/XFrames.hpp>
@@ -9,44 +10,47 @@
 #include <com/sun/star/presentation/XPresentation2.hpp>
 #include <com/sun/star/presentation/XPresentationSupplier.hpp>
 
-#include "officeconnection.h"
 #include "slideshowcontroller.h"
 
-SlideShowController::SlideShowController()
-{
-}
-
-void SlideShowController::load(const char *url, unsigned long long winid)
+SlideShowController::SlideShowController() noexcept
 {
     try {
-        auto& connect = OfficeConnection::instance();
+        // Get the remote office context. If necessary a new process is started.
+        m_xComponentContext = cppu::bootstrap();
+        m_xMultiComponentFactory = m_xComponentContext->getServiceManager();
+    } catch (...) {
+    }
+}
 
-        auto xToolkit = connect.qurey<css::awt::XToolkit>("com.sun.star.awt.Toolkit");
+void SlideShowController::load(const char *url, sal_Int64 winid) noexcept
+{
+    try {
+        auto xToolkit = qurey<css::awt::XToolkit>("com.sun.star.awt.Toolkit");
         css::uno::Reference<css::awt::XSystemChildFactory> xSystemChildFactory(xToolkit, css::uno::UNO_QUERY);
         css::uno::Reference<css::awt::XWindowPeer> xWindowPeer = xSystemChildFactory->createSystemChild(css::uno::Any(sal_Int64(winid)),
                                                                                     css::uno::Sequence<sal_Int8>(),
                                                                                     6);
         if (!xWindowPeer.is()) {
-            printf("Could not instantiate XWindowPeer\n");
+            printf("Could not instantiate XWindowPeer.\n");
             return;
         }
 
         css::uno::Reference<css::awt::XWindow> xWindow(xWindowPeer, css::uno::UNO_QUERY);
         if (!xWindow.is()) {
-            printf("Could not instantiate XWindow\n");
+            printf("Could not instantiate XWindow.\n");
             return;
         }
 
-        auto xFrame = connect.qurey<css::frame::XFrame>("com.sun.star.frame.Frame");
+        auto xFrame = qurey<css::frame::XFrame>("com.sun.star.frame.Frame");
         if (!xFrame.is()) {
-            printf("Could not instantiate XFrame\n");
+            printf("Could not instantiate XFrame.\n");
             return;
         }
         xFrame->initialize(xWindow);
 
-        auto xFramesSupplier = connect.qurey<css::frame::XFramesSupplier>("com.sun.star.frame.Desktop");
+        auto xFramesSupplier = qurey<css::frame::XFramesSupplier>("com.sun.star.frame.Desktop");
         if (!xFramesSupplier.is()) {
-            printf("Could not instantiate XFramsSupplier\n");
+            printf("Could not instantiate XFramsSupplier.\n");
             return;
         }
 
@@ -56,9 +60,9 @@ void SlideShowController::load(const char *url, unsigned long long winid)
         rtl::OUString oldName = xFrame->getName();
         xFrame->setName("qt_odk_slideplayer");
 
-        auto xComponentLoader = connect.qurey<css::frame::XComponentLoader>("com.sun.star.frame.Desktop");
+        auto xComponentLoader = qurey<css::frame::XComponentLoader>("com.sun.star.frame.Desktop");
         if (!xComponentLoader.is()) {
-            printf("Could not instantiate XComponentLoader\n");
+            printf("Could not instantiate XComponentLoader.\n");
             return;
         }
 
@@ -68,7 +72,7 @@ void SlideShowController::load(const char *url, unsigned long long winid)
                                                               css::frame::FrameSearchFlag::CHILDREN,
                                                               loadProps);
         if (!m_xComponent.is()) {
-            printf("Could not load Component from URL\n");
+            printf("Could not load Component from URL.\n");
             return;
         }
 
@@ -94,57 +98,57 @@ void SlideShowController::load(const char *url, unsigned long long winid)
         pause();
 
     } catch (css::uno::Exception &e) {
-        printf("%s\n", e.Message.toUtf8().getStr());
+        printf("%s.\n", e.Message.toUtf8().getStr());
         return;
     }
 }
 
-void SlideShowController::start()
+void SlideShowController::start() noexcept
 {
     m_xPresentation2->getController()->resume();
 }
 
-void SlideShowController::pause()
+void SlideShowController::pause() noexcept
 {
     m_xPresentation2->getController()->pause();
 }
 
-void SlideShowController::gotoNextEffect()
+void SlideShowController::gotoNextEffect() noexcept
 {
     m_xPresentation2->getController()->gotoNextEffect();
 }
 
-void SlideShowController::gotoPreviousEffect()
+void SlideShowController::gotoPreviousEffect() noexcept
 {
     m_xPresentation2->getController()->gotoPreviousEffect();
 }
 
-void SlideShowController::gotoNextSlide()
+void SlideShowController::gotoNextSlide() noexcept
 {
     m_xPresentation2->getController()->gotoNextSlide();
 }
 
-void SlideShowController::gotoPreviousSlide()
+void SlideShowController::gotoPreviousSlide() noexcept
 {
     m_xPresentation2->getController()->gotoPreviousSlide();
 }
 
-void SlideShowController::gotoFirstSlide()
+void SlideShowController::gotoFirstSlide() noexcept
 {
     m_xPresentation2->getController()->gotoFirstSlide();
 }
 
-void SlideShowController::gotoLastSlide()
+void SlideShowController::gotoLastSlide() noexcept
 {
     m_xPresentation2->getController()->gotoLastSlide();
 }
 
-int SlideShowController::getSlideCount()
+int SlideShowController::getSlideCount() noexcept
 {
     return m_xPresentation2->getController()->getSlideCount();
 }
 
-void SlideShowController::stopSound()
+void SlideShowController::stopSound() noexcept
 {
     return m_xPresentation2->getController()->stopSound();
 }
