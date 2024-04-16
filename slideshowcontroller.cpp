@@ -118,7 +118,7 @@ void SlideShowController::load(const char *url, sal_uInt64 winid) noexcept
         props->setPropertyValue("AllowAnimations", css::uno::Any(true));
         props->setPropertyValue("IsAlwaysOnTop", css::uno::Any(false));
         props->setPropertyValue("IsAutomatic", css::uno::Any(false));
-        props->setPropertyValue("IsEndless", css::uno::Any(false));
+        props->setPropertyValue("IsEndless", css::uno::Any(true));
         props->setPropertyValue("IsFullScreen", css::uno::Any(false));
         props->setPropertyValue("IsMouseVisible", css::uno::Any(false));
         props->setPropertyValue("StartWithNavigator", css::uno::Any(false));
